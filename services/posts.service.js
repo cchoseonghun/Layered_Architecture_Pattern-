@@ -1,11 +1,8 @@
-// services/posts.service.js
-
 const PostRepository = require('../repositories/posts.repository');
 const { Posts } = require('../models');
 
 class PostService {
   postRepository = new PostRepository(Posts);
-
 
   findAllPost = async () => {
     // 저장소(Repository)에게 데이터를 요청합니다.
@@ -41,6 +38,22 @@ class PostService {
       createdAt: createPostData.createdAt,
       updatedAt: createPostData.updatedAt,
     };
+  }
+
+  deletePost = async (postId, password) => {
+    const findPost = await this.postRepository.findPostById(postId);
+    if (!findPost) throw new Error(`Post doesn't exist`);
+
+    await this.postRepository.deletePost(postId, password);
+
+    return {
+      postId: findPost.postId, 
+      nickname: findPost.nickname, 
+      title: findPost.title, 
+      content: findPost.content, 
+      createdAt: findPost.createdAt, 
+      updatedAt: findPost.updatedAt, 
+    }
   }
 }
 
