@@ -13,9 +13,9 @@ beforeAll(async () => {
 describe('Layered Architecture Pattern, Posts Domain Integration Test', () => {
   test('GET /api/posts API (getPosts) Integration Test Success Case, Not Found Posts Data', async () => {
     const response = await supertest(app)
-      .get(`/api/posts`) // API의 HTTP Method & URL
+    .get(`/api/posts`) // API의 HTTP Method & URL
 
-    // 1. API의 status code가 200번이다.
+    // 1. Http status code == 200
     expect(response.status).toEqual(200);
 
     // 2. API의 Response 데이터는 { data: [] }
@@ -23,15 +23,81 @@ describe('Layered Architecture Pattern, Posts Domain Integration Test', () => {
   });
 
   test('POST /api/posts API (createPost) Integration Test Success Case', async () => {
-    // TODO: 여기에 코드를 작성해야합니다.
+    // { nickname, password, title, content }
+    const createPostBodyParams = { 
+      nickname: 'nickname_Success', 
+      password: 'password_Success', 
+      title: 'title_Success', 
+      content: 'content_Success', 
+    };
+
+    const response = await supertest(app)
+    .post('/api/posts')
+    .send(createPostBodyParams);
+
+    // 1. Http status code == 201
+    expect(response.status).toEqual(201);
+    
+    // 원하는 형태로 전달되는가 .. { postId, nickname, title, content, createdAt, updatedAt }
+    expect(response.body).toMatchObject({
+      data: {
+        postId: 1, 
+        nickname: createPostBodyParams.nickname, 
+        title: createPostBodyParams.title, 
+        content: createPostBodyParams.content, 
+        createdAt: expect.anything(), // 해당 파라미터가 객체안에 존재하면 어떤값이든 ok
+        updatedAt: expect.anything(), 
+      }
+    });
+
   });
 
   test('POST /api/posts API (createPost) Integration Test Error Case, Invalid Params Error', async () => {
-    // TODO: 여기에 코드를 작성해야합니다.
+    const response = await supertest(app)
+    .post('/api/posts')
+    .send()
+
+    // 1. Http status code == 400
+    expect(response.status).toEqual(400);
+
+    // 2. { errorMessage: error.message }의 형태로 데이터가 전달
+    expect(response.body).toEqual({ errorMessage: 'InvalidParamsError' });
   });
 
   test('GET /api/posts API (getPosts) Integration Test Success Case, is Exist Posts Data', async () => {
-    // TODO: 여기에 코드를 작성해야합니다.
+    const createPostBodyParams = { 
+      nickname: 'nickname_Success', 
+      password: 'password_Success', 
+      title: 'title_Success', 
+      content: 'content_Success', 
+    };
+
+    const response = await supertest(app)
+    .get('/api/posts')
+
+    // 1. Http status code == 200
+    expect(response.status).toEqual(200);
+
+    // return {
+    //   postId: post.postId,
+    //   nickname: post.nickname,
+    //   title: post.title,
+    //   createdAt: post.createdAt,
+    //   updatedAt: post.updatedAt
+    // }
+    // 2. 게시글 생성 API에서 만든 데이터가 정상적으로 조회가 되는지
+    expect(response.body).toMatchObject({
+      data: [
+        {
+          postId: 1, 
+          nickname: createPostBodyParams.nickname, 
+          title: createPostBodyParams.title, 
+          createdAt: expect.anything(), 
+          updatedAt: expect.anything(), 
+        }
+      ]
+    })
+
   });
 });
 
